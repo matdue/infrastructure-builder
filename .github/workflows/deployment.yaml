@@ -43,5 +43,5 @@ jobs:
           pip install twine
           export TWINE_USERNAME=aws
           export TWINE_PASSWORD=`aws codeartifact get-authorization-token --domain matdue --domain-owner 512206508224 --query authorizationToken --output text`
-          export TWINE_REPOSITORY_URL=`aws codeartifact get-repository-endpoint --domain matdue --domain-owner 512206508224 --repository team-data --format pypi --query repositoryEndpoint --output text`
+          export TWINE_REPOSITORY_URL=`aws codeartifact get-repository-endpoint --domain matdue --domain-owner 512206508224 --repository common --format pypi --query repositoryEndpoint --output text`
           twine upload dist/*
