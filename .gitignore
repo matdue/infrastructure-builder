@@ -1,0 +1,19 @@
+# the virtual environment
+.venv/
+
+# compiled python stuff
+__pycache__/
+*.py[cod]
+
+# idea files
+.idea
+
+# mac stuff
+.DS_Store
+
+# logging stuff
+*.log
+
+# build and publish artifacts
+*.egg-info
+dist
