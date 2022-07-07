@@ -13,7 +13,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      PIP_CACHE: ${{ github.workspace }}/.pipcache
+      XDG_CACHE_HOME: ${{ github.workspace }}/.pipcache
       AWS_DEFAULT_REGION: eu-central-1
 
     steps:
@@ -28,14 +28,14 @@ jobs:
       - name: Set up pip cache
         uses: actions/cache@v3
         with:
-          path: ${{ github.workspace }}/.pipcache
+          path: ${{ env.XDG_CACHE_HOME }}
           key: ${{ runner.os }}-pip-${{ hashFiles('setup.py') }}
           restore-keys: |
             ${{ runner.os }}-pip-
 
       - name: Install dependencies
         run: |
-          mkdir -p $PIP_CACHE
+          mkdir -p $XDG_CACHE_HOME
           pip install -e .[aws]
 
       - name: Run unit tests
