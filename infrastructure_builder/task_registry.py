@@ -16,7 +16,7 @@ class TaskRegistry:
     tasks = {}
 
     @classmethod
-    def register(cls, name: str, description: str):
+    def task(cls, name: str, description: str):
         """
         Decorator to mark a function as a task.
 

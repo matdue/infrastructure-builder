@@ -3,12 +3,12 @@ import unittest
 from infrastructure_builder.task_registry import TaskRegistry
 
 
-@TaskRegistry.register("sampleTask", description="A sample task")
+@TaskRegistry.task("sampleTask", description="A sample task")
 def sample_task():
     pass
 
 
-@TaskRegistry.register("sampleTask2", description="Another sample task")
+@TaskRegistry.task("sampleTask2", description="Another sample task")
 def sample_task2():
     pass
 

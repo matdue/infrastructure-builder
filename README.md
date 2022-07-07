@@ -31,7 +31,7 @@ import logging
 import sys
 from infrastructure_builder.task_registry import TaskRegistry
 
-@TaskRegistry.register("setupSomething", description="Setup something in cloud environment")
+@TaskRegistry.task("setupSomething", description="Setup something in cloud environment")
 def setup_something():
     pass
 
