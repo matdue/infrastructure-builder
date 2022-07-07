@@ -12,9 +12,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    env:
-      XDG_CACHE_HOME: ${{ github.workspace }}/.pipcache
-      AWS_DEFAULT_REGION: eu-central-1
 
     steps:
       - name: Checkout
@@ -24,18 +21,11 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: "3.9"
-
-      - name: Set up pip cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.XDG_CACHE_HOME }}
-          key: ${{ runner.os }}-pip-${{ hashFiles('setup.py') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          cache: pip
+          cache-dependency-path: setup.py
 
       - name: Install dependencies
         run: |
-          mkdir -p $XDG_CACHE_HOME
           pip install --upgrade setuptools wheel
           pip install -e .[aws]
 
@@ -44,8 +34,13 @@ jobs:
 
       - name: Deploy
         if: github.event_name == 'release'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: eu-central-1
         run: |
           python setup.py sdist bdist_wheel
+          pip install twine
           export TWINE_USERNAME=aws
           export TWINE_PASSWORD=`aws codeartifact get-authorization-token --domain matdue --domain-owner 512206508224 --query authorizationToken --output text`
           export TWINE_REPOSITORY_URL=`aws codeartifact get-repository-endpoint --domain matdue --domain-owner 512206508224 --repository team-data --format pypi --query repositoryEndpoint --output text`
