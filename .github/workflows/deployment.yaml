@@ -24,24 +24,31 @@ jobs:
           cache: pip
           cache-dependency-path: setup.py
 
+      - name: Prepare environment
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: eu-central-1
+        run: |
+          REPOSITORY_TOKEN=$(aws codeartifact get-authorization-token --domain matdue --domain-owner 512206508224 --query authorizationToken --output text)
+          REPOSITORY_URL=$(aws codeartifact get-repository-endpoint --domain matdue --domain-owner 512206508224 --repository common --format pypi --query repositoryEndpoint --output text)
+          PIP_REPOSITORY=https://aws:${REPOSITORY_TOKEN}@${REPOSITORY_URL:8}simple/
+          echo "TWINE_USERNAME=aws" >> $GITHUB_ENV
+          echo "TWINE_PASSWORD=${REPOSITORY_TOKEN}" >> $GITHUB_ENV
+          echo "TWINE_REPOSITORY_URL=${REPOSITORY_URL}" >> $GITHUB_ENV
+          echo "PIP_REPOSITORY=${PIP_REPOSITORY}" >> $GITHUB_ENV
+
       - name: Install dependencies
         run: |
-          pip install --upgrade setuptools wheel
-          pip install -e .[aws]
+          pip install --index-url $PIP_REPOSITORY --upgrade setuptools wheel
+          pip install --index-url $PIP_REPOSITORY -e .[aws]
 
       - name: Run unit tests
         run: python -m unittest discover -v
 
       - name: Deploy
         if: github.event_name == 'release'
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: eu-central-1
         run: |
           python setup.py sdist bdist_wheel
-          pip install twine
-          export TWINE_USERNAME=aws
-          export TWINE_PASSWORD=`aws codeartifact get-authorization-token --domain matdue --domain-owner 512206508224 --query authorizationToken --output text`
-          export TWINE_REPOSITORY_URL=`aws codeartifact get-repository-endpoint --domain matdue --domain-owner 512206508224 --repository common --format pypi --query repositoryEndpoint --output text`
+          pip install --index-url $PIP_REPOSITORY twine
           twine upload dist/*
