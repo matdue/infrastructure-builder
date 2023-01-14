@@ -1,0 +1,27 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "infrastructure-builder"
+version = "2.0"
+authors = [
+    { name="Matthias Düsterhöft", email="m.duesterhoeft@gmail.com" },
+]
+description = "Set up a cloud infrastructure"
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = []
+
+[project.optional-dependencies]
+aws = [
+    "boto3"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/matdue/infrastructure-builder"

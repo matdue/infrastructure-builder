@@ -22,7 +22,7 @@ jobs:
         with:
           python-version: "3.9"
           cache: pip
-          cache-dependency-path: setup.py
+          cache-dependency-path: pyproject.toml
 
       - name: Prepare environment
         env:
@@ -40,7 +40,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install --index-url $PIP_REPOSITORY --upgrade setuptools wheel
+          python -m pip install --index-url $PIP_REPOSITORY --upgrade pip
           pip install --index-url $PIP_REPOSITORY -e .[aws]
 
       - name: Run unit tests
@@ -49,6 +49,6 @@ jobs:
       - name: Deploy
         if: github.event_name == 'release'
         run: |
-          python setup.py sdist bdist_wheel
-          pip install --index-url $PIP_REPOSITORY twine
+          pip install --index-url $PIP_REPOSITORY --upgrade build twine
+          python -m build
           twine upload dist/*

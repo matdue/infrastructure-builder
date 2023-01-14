@@ -1,29 +1,12 @@
-# Infrastructure builder
-Tools to set up an infrastructure in a cloud. At the moment, AWS is the only supported cloud technology.
+# Infrastructure Builder
+Python tools to set up an infrastructure in a cloud. At the moment, AWS is the only supported cloud technology.
 
-## Technologies
-Install [Python 3.9.x](https://www.python.org/downloads/)
-
-## Project setup
-1. Initialize python virtual environment, i.e. change to project directory and create virtual environment
-    ```shell
-    python -m venv .venv
-    ```
-1. Activate virtual environment
-    ```shell
-    source .venv/bin/activate
-    ```
-1. Install package
-    ```shell
-    pip install -e .[aws]
-    pip install -e .\[aws\]  # zsh, e.g. MacOS
-    ```
+Usually a cloud setup has several resources which have to be set up in a specific sequence. While cloud environment support dependencies (e.g. AWS Cloudformation), it is sometimes not advisable to put all resources into a single configuration file. If you have multiple files, the Infrastructure Builder helps to put all these together. In addition, it is possible to add code which executes other tasks, e.g. building a Docker image, or modify cloud resources via API if unable to do so via configuration file. 
 
 # Usage
-Install package via `pip install infrastructure-builder`. If you would like to install AWS related tools, too, execute `pip install infrastructure-builder[aws]`.
+Install package via `pip install infrastructure-builder[aws]`.
 
-## Tasks
-Mark functions as tasks and execute them from command line:
+Create a file, e.g. `run.py`, which will host all tasks to set up a cloud infrastructure. A task might use AWS Cloudformation to do the work, or build a Docker image and upload it to a registry. The tasks to execute a given via command line::
 ```python
 #!/usr/bin/env python
 import argparse
@@ -88,3 +71,10 @@ There are some helper classes to deal easily with AWS services:
 | SecurityTokenService     | AWS STS related tasks                             |
 
 Any exceptions are coded in `exceptions.py`.
+
+# Development
+Source code is stored in directory `src`, unit tests in `tests`.
+
+To install all dependencies, run `pip install -e .[aws]` (on zsh, `pip install -e .\[aws\]`). Make sure your pip version is up-to-date.
+
+To execute the unit tests, run `python -m unittest discover -v`.
