@@ -26,4 +26,4 @@ def execute_live(command: list[str], inp: str = None, env=None):
         print(line, end="")
     proc.wait(5)
     if proc.returncode != 0:
-        raise Exception("Execution failed" + str(proc.returncode))
+        raise Exception(f"Execution failed with error code {proc.returncode}")
