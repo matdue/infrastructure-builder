@@ -8,8 +8,8 @@ from typing import Optional
 import boto3
 from botocore.exceptions import ClientError
 
-from infrastructure_builder.aws.exceptions import BuilderError
 from infrastructure_builder.aws.service_base import ServiceBase
+from infrastructure_builder.exceptions import BuilderError
 
 
 @dataclass
@@ -19,6 +19,9 @@ class Stack:
 
 
 class CloudFormation(ServiceBase):
+    """
+    Helper functions for AWS CloudFormation
+    """
     _wait_timeout: int
     _time_between_checks: int
     _role_arn: str
@@ -51,6 +54,15 @@ class CloudFormation(ServiceBase):
     def __init__(self, session: boto3.Session = None, region: str = None,
                  wait_timeout: int = 15, time_between_checks: int = 5,
                  role_arn: str = None):
+        """
+        Initializes a new helper object.
+
+        :param session: The AWS session to use, or None to create a new one
+        :param region: The region to use, or None to use the default region or the session's region
+        :param wait_timeout: The timeout in minutes
+        :param time_between_checks: The time to wait before checking the stack status again
+        :param role_arn: The ARN of the role which CloudFormation should assume (optional)
+        """
         super().__init__(session, region)
         self._wait_timeout = wait_timeout
         self._time_between_checks = time_between_checks
@@ -58,6 +70,10 @@ class CloudFormation(ServiceBase):
 
     @cached_property
     def client(self):
+        """
+        Returns a Boto3 client for AWS CloudFormation. The client object is cached.
+        :return: A Boto3 client for AWS CloudFormation
+        """
         return self.session.client("cloudformation", region_name=self.region)
 
     def _describe_stack(self, stack_name: str):
@@ -71,6 +87,12 @@ class CloudFormation(ServiceBase):
             raise
 
     def describe_stack(self, stack_name: str) -> Optional[Stack]:
+        """
+        Returns information about a CloudFormation stack.
+
+        :param stack_name: The name of the CloudFormation stack.
+        :return: A Stack object, or None if the stack was not found.
+        """
         stack = self._describe_stack(stack_name)
         if stack is None:
             return None
@@ -122,7 +144,15 @@ class CloudFormation(ServiceBase):
         if errors:
             raise BuilderError(f'Cannot empty S3 bucket {resource_id} ({errors})')
 
-    def delete_stack(self, stack_name: str, delete_content: bool = False):
+    def delete_stack(self, stack_name: str, delete_content: bool = False) -> None:
+        """
+        Delete a CloudFormation stack and optionally deletes all data which is stored in its resources.
+        Data in S3 buckets and ECR registries only will be deleted.
+
+        :param stack_name: The name of the CloudFormation stack.
+        :param delete_content: If True, data in S3 buckets and ECR registries will be deleted, else no data will be
+                               deleted (and the stack deletion will fail unless the resources do not have any data).
+        """
         stack = self._describe_stack(stack_name)
         if stack is None:
             raise BuilderError(f"Stack {stack_name} does not exist")
@@ -180,7 +210,8 @@ class CloudFormation(ServiceBase):
 
         return self._stack_outputs_to_stack(stack)
 
-    def _create_stack(self, stack_name: str, template: str, parameters, tags, capabilities) -> Stack:
+    def _create_stack(self, stack_name: str, template: str, parameters: list[dict[str, str]],
+                      tags: list[dict[str, str]], capabilities: list[str]) -> Stack:
         args = dict(
             StackName=stack_name,
             TemplateBody=template,
@@ -196,7 +227,8 @@ class CloudFormation(ServiceBase):
         logging.info(f'Stack {stack_id} created')
         return self._wait_until_completed(stack_id)
 
-    def _update_stack(self, stack, template: str, parameters, tags, capabilities) -> Stack:
+    def _update_stack(self, stack, template: str, parameters: list[dict[str, str]], tags: list[dict[str, str]],
+                      capabilities: list[str]) -> Stack:
         args = dict(
             StackName=stack["StackName"],
             TemplateBody=template,
@@ -218,11 +250,24 @@ class CloudFormation(ServiceBase):
 
     def create_or_update_stack(self, stack_name: str,
                                template_filename: str,
-                               tags: dict = None,
+                               tags: dict[str, str] = None,
                                capability_iam: bool = False,
                                capability_named_iam: bool = False,
                                capability_auto_expand: bool = False,
                                **parameters) -> Stack:
+        """
+        Create or update a CloudFormation stack.
+
+        :param stack_name: The name of the CloudFormation stack.
+        :param template_filename: The filename of the CloudFormation template. Both YAML and JSON are supported.
+        :param tags: The tags the stack should get, a Dictionary with tag name as key and its value.
+        :param capability_iam: If True, CAPABILITY_IAM will be passed to CloudFormation.
+        :param capability_named_iam: If True, CAPABILITY_NAMED_IAM will be passed to CloudFormation.
+        :param capability_auto_expand: If True, CAPABILITY_AUTO_EXPAND will be passed to CloudFormation.
+        :param parameters: The parameters which will be passed along with the template; the keys must match the
+                           parameters in the template, the value will be converted into a string.
+        :return:
+        """
         if tags is None:
             tags = {}
 

@@ -6,22 +6,30 @@ from time import sleep
 
 import boto3
 
-from infrastructure_builder.aws.exceptions import BuilderError
 from infrastructure_builder.aws.service_base import ServiceBase
+from infrastructure_builder.exceptions import BuilderError
 
 
 class Batch(ServiceBase):
+    """
+    Helper functions for AWS Batch
+    """
     def __init__(self, session: boto3.Session = None, region: str = None):
         super().__init__(session, region)
 
     @cached_property
     def client(self):
+        """
+        Returns a Boto3 client for AWS Batch. The client object is cached.
+        :return: A Boto3 client for AWS Batch
+        """
         return self.session.client("batch", region_name=self.region)
 
-    def submit_job(self, job_name: str, job_queue: str, job_definition: str,
-                   timeout=15, wait_until_completed=True) -> str:
+    def submit_job(self, job_name: str, job_queue: str, job_definition: str, timeout: int = 15,
+                   wait_until_completed: bool = True) -> str:
         """
-        Submits an AWS Batch Job.
+        Submits an AWS Batch Job. If this functions waits until the job has been completed, any updates will be logged
+        via standard Python logging module with info level.
 
         :param job_name: The name of the job.
         :param job_queue: The queue where the job will be put into.
@@ -57,7 +65,7 @@ class Batch(ServiceBase):
 
         logging.info(f"Job status reason: {job_description['statusReason']}")
 
-        # https://eu-central-1.console.aws.amazon.com/batch/v2/home?region=eu-central-1#jobs/detail/6b6da9eb-5eb8-431e-9d9b-2dc69185f883
+        # https://region.console.aws.amazon.com/batch/v2/home?region=region#jobs/detail/...
         aws_region = re.match(r"arn:aws:batch:(.*?):.*", job_description["jobQueue"]).group(1)
         url = f"https://{aws_region}.console.aws.amazon.com/batch/v2/home?region={aws_region}#jobs/detail/{job_id}"
         logging.info(f"Job details in AWS console: {url}")

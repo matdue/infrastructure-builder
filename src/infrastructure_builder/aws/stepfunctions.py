@@ -6,21 +6,32 @@ from time import sleep
 
 import boto3
 
-from infrastructure_builder.aws.exceptions import BuilderError
 from infrastructure_builder.aws.service_base import ServiceBase
+from infrastructure_builder.exceptions import BuilderError
 
 
 class StepFunctions(ServiceBase):
+    """
+    Helper functions for AWS Step Functions
+    """
     def __init__(self, session: boto3.Session = None, region: str = None):
         super().__init__(session, region)
 
     @cached_property
     def client(self):
+        """
+        Returns a Boto3 client for AWS Step Functions. The client object is cached.
+        :return: A Boto3 client for AWS Step Functions
+        """
         return self.session.client("stepfunctions", region_name=self.region)
 
-    def execute(self, state_machine_arn: str, input_data: str = None, timeout=15, wait_until_completed=True):
+    def execute(self, state_machine_arn: str, input_data: str = None, timeout: int = 15,
+                wait_until_completed: bool = True) -> str:
         """
-        Executes a state machine.
+        Executes a state machine. The function returns either immediately, or it will wait until the state machine has
+        finished.
+
+        If wait_until_completed is True, any state changes will be logged via Python logging module at info level.
 
         :param state_machine_arn: The ARN of the state machine.
         :param input_data: The JSON input data.
@@ -59,7 +70,7 @@ class StepFunctions(ServiceBase):
             if "cause" in execution_description:
                 logging.info(f"Cause: {execution_description['cause']}")
 
-        # https://eu-central-1.console.aws.amazon.com/states/home?region=eu-central-1#/v2/executions/details/arn:aws:states:eu-central-1:123456789012:execution:xyz:7f761627-cd3a-3bd0-289f-a0a847f1dcd4
+        # https://region.console.aws.amazon.com/states/home?region=region#/v2/executions/details/arn:...
         aws_region = re.match(r"arn:aws:states:(.*?):.*", execution_arn).group(1)
         url = f"https://{aws_region}.console.aws.amazon.com/states/home?region={aws_region}#/v2/executions/details/{execution_arn}"
         logging.info(f"Execution details in AWS console: {url}")
