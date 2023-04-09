@@ -7,6 +7,9 @@ import boto3
 from infrastructure_builder.aws.service_base import ServiceBase
 
 
+logger = logging.getLogger(__name__)
+
+
 class LambdaFunction(ServiceBase):
     """
     Helper functions for AWS Lambda
@@ -47,9 +50,12 @@ class LambdaFunction(ServiceBase):
 
             while True:
                 alias_config = self.client.get_alias(FunctionName=function_name, Name=alias)
-                if alias_config["FunctionVersion"] == function_version:
+                if (alias_config["FunctionVersion"] == function_version or
+                        "RoutingConfig" not in alias_config or
+                        "AdditionalVersionWeights" not in alias_config["RoutingConfig"] or
+                        len(alias_config["RoutingConfig"]["AdditionalVersionWeights"]) == 0):
                     break
-                logging.info("Waiting for new Lambda version becoming active")
+                logger.info("Waiting for new Lambda version becoming active")
                 sleep(3)
 
     def delete_old_versions(self, function_name: str, keep_latest_versions: int = 5) -> list[str]:

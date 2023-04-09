@@ -10,6 +10,9 @@ from infrastructure_builder.aws.service_base import ServiceBase
 from infrastructure_builder.exceptions import BuilderError
 
 
+logger = logging.getLogger(__name__)
+
+
 class Batch(ServiceBase):
     """
     Helper functions for AWS Batch
@@ -45,7 +48,7 @@ class Batch(ServiceBase):
         if not wait_until_completed:
             return job_id
 
-        logging.info(f"Job {job_id} submitted, now waiting until completed.")
+        logger.info(f"Job {job_id} submitted, now waiting until completed.")
         last_job_status = None
         start = datetime.now(timezone.utc) - timedelta(seconds=30)
         end = start + timedelta(minutes=timeout)
@@ -57,17 +60,17 @@ class Batch(ServiceBase):
             job_status = job_description["status"]
             if job_status != last_job_status:
                 last_job_status = job_status
-                logging.info(f"Job status: {job_status}")
+                logger.info(f"Job status: {job_status}")
             if job_status in ["SUCCEEDED", "FAILED"]:
                 break
 
             sleep(5)
 
-        logging.info(f"Job status reason: {job_description['statusReason']}")
+        logger.info(f"Job status reason: {job_description['statusReason']}")
 
         # https://region.console.aws.amazon.com/batch/v2/home?region=region#jobs/detail/...
         aws_region = re.match(r"arn:aws:batch:(.*?):.*", job_description["jobQueue"]).group(1)
         url = f"https://{aws_region}.console.aws.amazon.com/batch/v2/home?region={aws_region}#jobs/detail/{job_id}"
-        logging.info(f"Job details in AWS console: {url}")
+        logger.info(f"Job details in AWS console: {url}")
 
         return job_id

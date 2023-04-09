@@ -12,6 +12,9 @@ from infrastructure_builder.aws.service_base import ServiceBase
 from infrastructure_builder.exceptions import BuilderError
 
 
+logger = logging.getLogger(__name__)
+
+
 @dataclass
 class Stack:
     name: str
@@ -110,7 +113,7 @@ class CloudFormation(ServiceBase):
                 self._empty_s3_bucket(resource_id)
 
     def _empty_ecr_repository(self, resource_id: str):
-        logging.info(f'Deleting all images in {resource_id}')
+        logger.info(f'Deleting all images in {resource_id}')
         ecr_client = self.session.client("ecr", region_name=self.region)
         images = ecr_client.list_images(repositoryName=resource_id)
         # The response contains the first 100 images only.
@@ -126,7 +129,7 @@ class CloudFormation(ServiceBase):
             raise BuilderError(f'Cannot empty ECR {resource_id} ({failures})')
 
     def _empty_s3_bucket(self, resource_id: str):
-        logging.info(f'Deleting all files in {resource_id}')
+        logger.info(f'Deleting all files in {resource_id}')
         s3_client = self.session.client("s3", region_name=self.region)
         resp = s3_client.list_object_versions(Bucket=resource_id)
         # The response contains the first 1000 images only.
@@ -182,8 +185,8 @@ class CloudFormation(ServiceBase):
             unprocessed_events = list(filter(
                 lambda e: e["Timestamp"] >= start and e["EventId"] not in processed_events, all_events))
             for event in reversed(unprocessed_events):
-                logging.info((f'{event["Timestamp"]} {event["ResourceStatus"]} {event["ResourceType"]}: '
-                              f'{event["LogicalResourceId"]} {event.get("ResourceStatusReason", "")}'))
+                logger.info((f'{event["Timestamp"]} {event["ResourceStatus"]} {event["ResourceType"]}: '
+                             f'{event["LogicalResourceId"]} {event.get("ResourceStatusReason", "")}'))
                 processed_events.add(event["EventId"])
 
         while True:
@@ -224,7 +227,7 @@ class CloudFormation(ServiceBase):
 
         stack = self.client.create_stack(**args)
         stack_id = stack["StackId"]
-        logging.info(f'Stack {stack_id} created')
+        logger.info(f'Stack {stack_id} created')
         return self._wait_until_completed(stack_id)
 
     def _update_stack(self, stack, template: str, parameters: list[dict[str, str]], tags: list[dict[str, str]],

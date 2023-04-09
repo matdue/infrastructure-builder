@@ -4,6 +4,9 @@ import subprocess
 from infrastructure_builder.exceptions import BuilderError
 
 
+logger = logging.getLogger(__name__)
+
+
 def execute(command: list[str], inp: str = None, output_file: str = None, env=None):
     """
     Execute an external command, wait until it terminates, and return a CompletedProcess instance.
@@ -19,8 +22,8 @@ def execute(command: list[str], inp: str = None, output_file: str = None, env=No
     """
     result = subprocess.run(command, input=inp, capture_output=True, text=True, env=env)
     if result.returncode != 0:
-        logging.error(result.stderr)
-        logging.error(result.stdout)
+        logger.error(result.stderr)
+        logger.error(result.stdout)
         raise Exception("Execution failed")
     if output_file:
         with open(output_file, "w") as f:
@@ -30,7 +33,8 @@ def execute(command: list[str], inp: str = None, output_file: str = None, env=No
 
 def execute_live(command: list[str], inp: str = None, env=None) -> None:
     """
-    Execute an external command, wait until it terminates, and print out the command's output live to stdout.
+    Execute an external command, wait until it terminates, and logs the command's output live to standard Python logging
+    with info level.
     This function is just a wrapper for subprocess.Popen() and wait().
 
     If the command returns with an error code, a BuilderError exception will be risen.
@@ -49,7 +53,7 @@ def execute_live(command: list[str], inp: str = None, env=None) -> None:
         proc.stdin.write(inp)
         proc.stdin.close()
     for line in proc.stdout:
-        print(line, end="")
+        logger.info(line.removesuffix("\n"))
     proc.wait(5)
     if proc.returncode != 0:
         raise BuilderError(f"Execution failed with error code {proc.returncode}")

@@ -9,36 +9,19 @@ Install package via `pip install infrastructure-builder[aws]`.
 Create a file, e.g. `run.py`, which will host all tasks to set up a cloud infrastructure. A task might use AWS Cloudformation to do the work, or build a Docker image and upload it to a registry. The tasks to execute a given via command line::
 ```python
 #!/usr/bin/env python
-import argparse
 import logging
-import sys
 from infrastructure_builder.task_registry import TaskRegistry
 
-@TaskRegistry.task("setupSomething", description="Setup something in cloud environment")
+@TaskRegistry.task("setupSomething", description="Set up something in cloud environment")
 def setup_something():
     pass
 
 def main():
-   valid_tasks = f"Valid tasks:\n{TaskRegistry.format_task_descriptions()}"
-   parser = argparse.ArgumentParser(description="Build, run and deploy", 
-                                    epilog=valid_tasks,
-                                    formatter_class=argparse.RawTextHelpFormatter)
-   parser.add_argument("tasks", metavar="task", type=str, nargs='+',
-                       help="Task to execute")
-   args = parser.parse_args(None if sys.argv[1:] else ["-h"])  # print help if no task was given
-
-   for t in args.tasks:
-      task_to_execute = TaskRegistry.get_task(t)
-      if task_to_execute is None:
-         logging.error(f"Unknown task {t}")
-         logging.error(valid_tasks)
-         return
-
-      task_to_execute.execute()
-
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    TaskRegistry.execute_from_command_line()
 
 if __name__ == "__main__":
-   main()
+    main()
 ```
 
 ## Execute external commands
@@ -67,8 +50,11 @@ There are some helper classes to deal easily with AWS services:
 | CodeArtifact             | CodeArtifact helper, e.g. get authorization token |
 | Cognito                  | Cognito helper                                    |
 | ElasticContainerRegistry | Docker registry, e.g. get authorization token     |
+| LambdaFunction           | Lambda Function helper                            |
 | Route53                  | Domain management, e.g. list managed domains      |
 | SecurityTokenService     | AWS STS related tasks                             |
+| Step Functions           | Step Functions helper                             |
+| Systems Manager          | Systems Manager helper                            |
 
 Any exceptions are coded in `exceptions.py`.
 
