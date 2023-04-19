@@ -38,14 +38,38 @@ class TaskRegistry:
     @classmethod
     def get_task(cls, name: str) -> Optional[Task]:
         """
-        Look up a task and do not care about case-sensitivity.
+        Look up a task the following way:
+         - Task matches exactly given name -> ok
+         - Task matches case-insensitive -> ok
+         - A unique task starts with given name -> ok
+         - A unique task starts with given name, case-insensitive -> ok
+
+        If no (unique) task has been found, None is returned.
 
         :param name: The task name to look up
         :return: task or None if no matching task was found
         """
+        task = cls.tasks.get(name, None)
+        if task is not None:
+            return task
+
+        # Try case-insensitive
         name_lower = name.lower()
-        real_task_name = next((key for key in cls.tasks if key.lower() == name_lower), None)
-        return cls.tasks.get(real_task_name, None)
+        candidates = [key for key in cls.tasks if key.lower() == name_lower]
+        if len(candidates) == 1:
+            return cls.tasks[candidates[0]]
+
+        # Start of name matches
+        candidates = [key for key in cls.tasks if key.startswith(name)]
+        if len(candidates) == 1:
+            return cls.tasks[candidates[0]]
+
+        # Start of name matches, case-insensitive
+        candidates = [key for key in cls.tasks if key.lower().startswith(name_lower)]
+        if len(candidates) == 1:
+            return cls.tasks[candidates[0]]
+
+        return None
 
     @classmethod
     def format_task_descriptions(cls) -> str:
