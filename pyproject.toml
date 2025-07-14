@@ -4,18 +4,19 @@ build-backend = "uv_build"
 
 [project]
 name = "infrastructure-builder"
-version = "2.0.1"
+version = "2.0.2"
 authors = [
     { name="Matthias Düsterhöft", email="m.duesterhoeft@gmail.com" },
 ]
 description = "Set up a cloud infrastructure"
 readme = "README.md"
-requires-python = ">=3.7"
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
 ]
 license = "MIT"
+license-files = ["LICEN[CS]E.*"]
+requires-python = ">=3.7"
 dependencies = []
 
 [project.optional-dependencies]
@@ -24,4 +25,4 @@ aws = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/matdue/infrastructure-builder"
+Homepage = "https://github.com/matdue/infrastructure-builder"
