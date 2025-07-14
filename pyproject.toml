@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "infrastructure-builder"
-version = "2.0"
+version = "2.0.1"
 authors = [
     { name="Matthias Düsterhöft", email="m.duesterhoeft@gmail.com" },
 ]

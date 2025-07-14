@@ -28,3 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.0] - 2022-07-07
 ### Changed
 - Refactoring of task registry
+
+## [2.0.1] - 2025-07-14
+### Changed
+- Switch to uv
