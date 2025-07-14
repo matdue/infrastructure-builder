@@ -17,3 +17,7 @@ __pycache__/
 # build and publish artifacts
 *.egg-info
 dist
+
+# uv
+uv.lock
+out/

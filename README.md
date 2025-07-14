@@ -1,7 +1,7 @@
 # Infrastructure Builder
-Python tools to set up an infrastructure in a cloud. At the moment, AWS is the only supported cloud technology.
+Python tools to set up an infrastructure in the cloud. At the moment, AWS is the only supported cloud technology.
 
-Usually a cloud setup has several resources which have to be set up in a specific sequence. While cloud environment support dependencies (e.g. AWS Cloudformation), it is sometimes not advisable to put all resources into a single configuration file. If you have multiple files, the Infrastructure Builder helps to put all these together. In addition, it is possible to add code which executes other tasks, e.g. building a Docker image, or modify cloud resources via API if unable to do so via configuration file. 
+Usually a cloud setup has several resources which have to be set up in a specific sequence. While cloud environment supports dependencies (e.g. AWS Cloudformation), it is sometimes not advisable to put all resources into a single configuration file. If you have multiple files, the Infrastructure Builder helps to put all these together. In addition, it is possible to add code which executes other tasks, e.g. building a Docker image, or modify cloud resources via API if unable to do so via a configuration file. 
 
 # Usage
 Install package via `pip install infrastructure-builder[aws]`.
@@ -61,6 +61,6 @@ Any exceptions are coded in `exceptions.py`.
 # Development
 Source code is stored in directory `src`, unit tests in `tests`.
 
-To install all dependencies, run `pip install -e .[aws]` (on zsh, `pip install -e .\[aws\]`). Make sure your pip version is up-to-date.
+To install all dependencies, run `pip install -e .[aws]` (on zsh, `pip install -e .\[aws\]`; with uv, `uv pip install -e .[aws]`). Make sure your pip version is up-to-date.
 
-To execute the unit tests, run `python -m unittest discover -v`.
+To execute the unit tests, run `python -m unittest discover -v` (with uv, `uv run -m unittest discover -v`).
