@@ -64,3 +64,22 @@ Source code is stored in directory `src`, unit tests in `tests`.
 To install all dependencies, run `pip install -e .[aws]` (on zsh, `pip install -e .\[aws\]`; with uv, `uv pip install -e .[aws]`). Make sure your pip version is up-to-date.
 
 To execute the unit tests, run `python -m unittest discover -v` (with uv, `uv run -m unittest discover -v`).
+
+## Local environment with Linux and AWS
+Script to set up a local environment:
+```shell
+#!/usr/bin/env bash
+REPOSITORY_TOKEN=$(aws codeartifact get-authorization-token --domain xxx --domain-owner yyy --query authorizationToken --output text)
+REPOSITORY_URL=$(aws codeartifact get-repository-endpoint --domain xxx --domain-owner yyy --repository common --format pypi --query repositoryEndpoint --output text)
+PIP_REPOSITORY=https://aws:${REPOSITORY_TOKEN}@${REPOSITORY_URL:8}simple/
+pip install --index-url "$PIP_REPOSITORY" -e .[aws]
+```
+
+## Local environment with Windows and AWS
+Script to set up a local environment:
+```shell
+$Env:REPOSITORY_TOKEN = aws codeartifact get-authorization-token --domain xxx --domain-owner yyy --query authorizationToken --output text
+$Env:REPOSITORY_URL= aws codeartifact get-repository-endpoint --domain xxx --domain-owner yyy --repository common --format pypi --query repositoryEndpoint --output text
+$Env:PIP_REPOSITORY = "https://aws:$($Env:REPOSITORY_TOKEN)@$($Env:REPOSITORY_URL.Substring(8))simple/"
+pip install --index-url "$Env:PIP_REPOSITORY" -e .[aws]
+```
