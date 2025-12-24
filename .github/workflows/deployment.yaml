@@ -33,7 +33,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v5
         with:
           aws-region: eu-central-1
-          role-to-assume: arn:aws:iam::512206508224:role/GitHubOidcProvider-Role-ZWIgTgbKNjyW
+          role-to-assume: ${{ secrets.OIDC_PROVIDER_ROLE }}
 
       - name: Prepare environment
         run: |
